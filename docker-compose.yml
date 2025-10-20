@@ -1,0 +1,35 @@
+version: "3"
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:usr/src/app:ro
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - DATABASE_HOST=db          # 👈 use the service name, not localhost
+      - DATABASE_PORT=5432
+      - DATABASE_PASSWORD=1234
+      - DATABASE_NAME=fastAPI
+      - DATABASE_USERNAME=rogers
+      - SECRET_KEY=09D25E0943D8964C3F487FDBB1C6F7E1A2B4C8B5A6D7E8F9G0H1I2J3K4L5M6N
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+    depends_on:
+      - db                        # 👈 ensures db starts first
+
+  db:
+    image: postgres:16.10            # or your preferred version
+    restart: always
+    environment:
+      POSTGRES_USER: rogers
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: fastAPI
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # persists your DB
+
+volumes:
+  postgres_data:
